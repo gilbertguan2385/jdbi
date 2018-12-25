@@ -360,7 +360,15 @@ handle.createUpdate("insert into contacts (id, name) values (:id, :name)")
       .execute();
 ----
 
-You can bind multiple values at once, from either a `List<T>` or a list of arguments. Note that this requires your binding to be written using the `<boundValue>` form (as opposed to `:boundValue` for most of the other bindings.)
+You can bind multiple values at once, from either a `List<T>` or a vararg.
+
+Note that this requires your binding to be written like an attribute (e.g. `<boundValue>`)
+as opposed to a binding (`:boundValue`). Jdbi will _bind_ each value in the passed collection under a
+generated key name, and _render_ the placeholder in the query to a comma-separated list of those keys
+using the configured `TemplateEngine`. At a later stage in query execution, the `SqlParser` will bind
+the rendered comma-separated list of keys to its values. This means you should *not* embed any SQL syntax
+like string delimiters in your values, and this feature carries no risks like SQL injection;
+the templating work is only an intermediary step used to expand your single placeholder to a list.
 
 [source,java]
 ----
