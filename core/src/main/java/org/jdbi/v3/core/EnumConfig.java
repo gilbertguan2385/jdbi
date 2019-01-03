@@ -13,16 +13,21 @@
  */
 package org.jdbi.v3.core;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.jdbi.v3.core.config.JdbiConfig;
 
 /**
  * Configuration for behavior related to {@link Enum}s.
  */
 public class EnumConfig implements JdbiConfig<EnumConfig> {
-    private EnumHandling handling;
+    private static final Set<Class<? extends Annotation>> ALLOWED_HANDLINGS = new HashSet<>(Arrays.asList(EnumByName.class, EnumByOrdinal.class));
+    private Class<? extends Annotation> handling;
 
     public EnumConfig() {
-        handling = EnumHandling.BY_NAME;
+        handling = EnumByName.class;
     }
 
     private EnumConfig(EnumConfig other) {
@@ -36,7 +41,7 @@ public class EnumConfig implements JdbiConfig<EnumConfig> {
      */
     @Deprecated
     public boolean isEnumHandledByName() {
-        return handling == EnumHandling.BY_NAME;
+        return handling == EnumByName.class;
     }
 
     /**
@@ -46,14 +51,17 @@ public class EnumConfig implements JdbiConfig<EnumConfig> {
      */
     @Deprecated
     public void setEnumHandledByName(boolean byName) {
-        handling = byName ? EnumHandling.BY_NAME : EnumHandling.BY_ORDINAL;
+        handling = byName ? EnumByName.class : EnumByOrdinal.class;
     }
 
-    public EnumHandling getEnumHandling() {
+    public Class<? extends Annotation> getEnumHandling() {
         return handling;
     }
 
-    public EnumConfig setEnumHandling(EnumHandling handling) {
+    public EnumConfig setEnumHandling(Class<? extends Annotation> handling) {
+        if (!ALLOWED_HANDLINGS.contains(handling)) {
+            throw new IllegalArgumentException(handling + " is not an accepted enum handling annotation");
+        }
         this.handling = handling;
         return this;
     }

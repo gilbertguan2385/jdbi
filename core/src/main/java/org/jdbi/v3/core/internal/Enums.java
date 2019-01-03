@@ -51,7 +51,7 @@ public class Enums {
         Class<? extends Annotation> qualifier = classByNameOrOrdinal(enumClass);
 
         if (qualifier == null) {
-            qualifier = config.get(EnumConfig.class).getEnumHandling().getAnnotation();
+            qualifier = config.get(EnumConfig.class).getEnumHandling();
         }
 
         return AnnotationFactory.create(qualifier);
