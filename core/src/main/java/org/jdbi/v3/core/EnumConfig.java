@@ -19,12 +19,14 @@ import org.jdbi.v3.core.config.JdbiConfig;
  * Configuration for behavior related to {@link Enum}s.
  */
 public class EnumConfig implements JdbiConfig<EnumConfig> {
-    private boolean handleEnumsByName = true;
+    private EnumHandling handling;
 
-    public EnumConfig() {}
+    public EnumConfig() {
+        handling = EnumHandling.BY_NAME;
+    }
 
     private EnumConfig(EnumConfig other) {
-        this.handleEnumsByName = other.handleEnumsByName;
+        handling = other.handling;
     }
 
     /**
@@ -32,8 +34,9 @@ public class EnumConfig implements JdbiConfig<EnumConfig> {
      *
      * @return true if enums are handled by name, false if enums are handled by ordinal
      */
+    @Deprecated
     public boolean isEnumHandledByName() {
-        return handleEnumsByName;
+        return handling == EnumHandling.BY_NAME;
     }
 
     /**
@@ -41,8 +44,18 @@ public class EnumConfig implements JdbiConfig<EnumConfig> {
      *
      * @param byName true if enums should be handled by name, false if enums should be handled by ordinal
      */
+    @Deprecated
     public void setEnumHandledByName(boolean byName) {
-        this.handleEnumsByName = byName;
+        handling = byName ? EnumHandling.BY_NAME : EnumHandling.BY_ORDINAL;
+    }
+
+    public EnumHandling getEnumHandling() {
+        return handling;
+    }
+
+    public EnumConfig setEnumHandling(EnumHandling handling) {
+        this.handling = handling;
+        return this;
     }
 
     @Override

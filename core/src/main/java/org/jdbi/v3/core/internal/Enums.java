@@ -51,8 +51,7 @@ public class Enums {
         Class<? extends Annotation> qualifier = classByNameOrOrdinal(enumClass);
 
         if (qualifier == null) {
-            boolean defaultByName = config.get(EnumConfig.class).isEnumHandledByName();
-            qualifier = defaultByName ? EnumByName.class : EnumByOrdinal.class;
+            qualifier = config.get(EnumConfig.class).getEnumHandling().getAnnotation();
         }
 
         return AnnotationFactory.create(qualifier);
