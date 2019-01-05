@@ -18,32 +18,19 @@ import java.util.Optional;
 import org.jdbi.v3.core.config.ConfigRegistry;
 import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.mapper.ColumnMapperFactory;
-import org.jdbi.v3.core.qualifier.QualifiedType;
 import org.jdbi.v3.json.Json;
-import org.jdbi.v3.json.JsonConfig;
 
 /**
- * converts a {@code (@Json) String} fetched by another mapper into a value object
+ * Default {@code @Json String} mapper that just reads  a column as a String.
  */
 @Json
-public class JsonColumnMapperFactory implements ColumnMapperFactory {
-    private static final QualifiedType JSON_STRING = QualifiedType.of(String.class).with(Json.class);
-
+public class JsonStringColumnMapperFactory implements ColumnMapperFactory {
     @Override
     public Optional<ColumnMapper<?>> build(Type type, ConfigRegistry config) {
         if (String.class.equals(type)) {
+            return Optional.of((rs, i, ctx) -> rs.getString(i));
+        } else {
             return Optional.empty();
         }
-
-        return Optional.of((rs, i, ctx) -> {
-            // look for specialized json support first, revert to simple String mapping if absent
-            @SuppressWarnings("unchecked")
-            ColumnMapper<String> jsonStringMapper = (ColumnMapper<String>) ctx.findColumnMapperFor(JSON_STRING)
-                .orElseThrow(() -> new RuntimeException("No @Json String mapper found."));
-
-            String json = jsonStringMapper.map(rs, i, ctx);
-
-            return json == null ? null : ctx.getConfig(JsonConfig.class).getJsonMapper().fromJson(type, json, ctx);
-        });
     }
 }

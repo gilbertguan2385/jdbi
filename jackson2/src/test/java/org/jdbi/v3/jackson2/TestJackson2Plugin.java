@@ -13,22 +13,26 @@
  */
 package org.jdbi.v3.jackson2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import org.jdbi.v3.core.rule.DatabaseRule;
+import org.jdbi.v3.core.rule.PgDatabaseRule;
 import org.jdbi.v3.json.AbstractJsonMapperTest;
-import org.jdbi.v3.postgres.PostgresDbRule;
-import org.jdbi.v3.testing.JdbiRule;
+import org.jdbi.v3.postgres.PostgresPlugin;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.Before;
 import org.junit.Rule;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-
 public class TestJackson2Plugin extends AbstractJsonMapperTest {
     @Rule
-    public JdbiRule db = PostgresDbRule.rule();
+    public DatabaseRule db = new PgDatabaseRule()
+        .withPlugin(new SqlObjectPlugin())
+        .withPlugin(new Jackson2Plugin())
+        .withPlugin(new PostgresPlugin());
 
     @Before
     public void before() {
-        jdbi = db.getJdbi().installPlugin(new Jackson2Plugin());
+        jdbi = db.getJdbi();
         jdbi.getConfig(Jackson2Config.class).setMapper(new ObjectMapper().registerModule(new ParameterNamesModule()));
     }
 }

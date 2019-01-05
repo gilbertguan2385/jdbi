@@ -17,11 +17,15 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.spi.JdbiPlugin;
 import org.jdbi.v3.json.internal.JsonArgumentFactory;
 import org.jdbi.v3.json.internal.JsonColumnMapperFactory;
+import org.jdbi.v3.json.internal.JsonStringArgumentFactory;
+import org.jdbi.v3.json.internal.JsonStringColumnMapperFactory;
 
 public class JsonPlugin implements JdbiPlugin {
     @Override
     public void customizeJdbi(Jdbi jdbi) {
+        jdbi.registerArgument(new JsonStringArgumentFactory());
         jdbi.registerArgument(new JsonArgumentFactory());
+        jdbi.registerColumnMapper(new JsonStringColumnMapperFactory());
         jdbi.registerColumnMapper(new JsonColumnMapperFactory());
     }
 }

@@ -13,18 +13,23 @@
  */
 package org.jdbi.v3.gson2;
 
+import org.jdbi.v3.core.rule.DatabaseRule;
+import org.jdbi.v3.core.rule.PgDatabaseRule;
 import org.jdbi.v3.json.AbstractJsonMapperTest;
-import org.jdbi.v3.postgres.PostgresDbRule;
-import org.jdbi.v3.testing.JdbiRule;
+import org.jdbi.v3.postgres.PostgresPlugin;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.Before;
 import org.junit.Rule;
 
 public class TestGson2Plugin extends AbstractJsonMapperTest {
     @Rule
-    public JdbiRule db = PostgresDbRule.rule();
+    public DatabaseRule db = new PgDatabaseRule()
+        .withPlugin(new SqlObjectPlugin())
+        .withPlugin(new Gson2Plugin())
+        .withPlugin(new PostgresPlugin());
 
     @Before
     public void before() {
-        jdbi = db.getJdbi().installPlugin(new Gson2Plugin());
+        jdbi = db.getJdbi();
     }
 }

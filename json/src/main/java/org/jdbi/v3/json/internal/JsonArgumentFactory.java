@@ -18,9 +18,7 @@ import java.util.Optional;
 import org.jdbi.v3.core.argument.Argument;
 import org.jdbi.v3.core.argument.ArgumentFactory;
 import org.jdbi.v3.core.config.ConfigRegistry;
-import org.jdbi.v3.core.internal.JdbiOptionals;
 import org.jdbi.v3.core.qualifier.QualifiedType;
-import org.jdbi.v3.core.statement.UnableToCreateStatementException;
 import org.jdbi.v3.json.Json;
 import org.jdbi.v3.json.JsonConfig;
 
@@ -29,10 +27,7 @@ import org.jdbi.v3.json.JsonConfig;
  */
 @Json
 public class JsonArgumentFactory implements ArgumentFactory {
-    private static final String JSON_NOT_STORABLE = String.format(
-        "No argument factory found for `@%s String` or 'String'",
-        Json.class.getSimpleName()
-    );
+    private static final QualifiedType JSON_STRING = QualifiedType.of(String.class).with(Json.class);
 
     @Override
     public Optional<Argument> build(Type type, Object value, ConfigRegistry config) {
@@ -44,10 +39,8 @@ public class JsonArgumentFactory implements ArgumentFactory {
             String json = value == null ? null : ctx.getConfig(JsonConfig.class).getJsonMapper().toJson(type, value, ctx);
 
             // look for specialized json support first, revert to simple String binding if absent
-            Argument stringBinder = JdbiOptionals.findFirstPresent(
-                () -> ctx.findArgumentFor(QualifiedType.of(String.class).with(Json.class), json),
-                () -> ctx.findArgumentFor(String.class, json))
-                    .orElseThrow(() -> new UnableToCreateStatementException(JSON_NOT_STORABLE));
+            Argument stringBinder = ctx.findArgumentFor(JSON_STRING, json)
+                .orElseThrow(() -> new RuntimeException("No @Json String argument found."));
 
             stringBinder.apply(pos, stmt, ctx);
         });
